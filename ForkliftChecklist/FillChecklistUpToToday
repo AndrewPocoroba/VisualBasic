@@ -1,0 +1,56 @@
+Sub FillChecklistUpToToday()
+    Dim doc As Document
+    Dim tbl As Table
+    Dim dayIndex As Integer
+    Dim colIndex As Integer
+    Dim i As Integer
+    Dim cellRange As Range
+    Dim checkCount As Integer
+    Dim todayIndex As Integer
+    Dim days As Variant
+
+    Set doc = ActiveDocument
+
+    If doc.Tables.Count = 0 Then
+        MsgBox "No tables found in the document.", vbExclamation
+        Exit Sub
+    End If
+
+    Set tbl = doc.Tables(1)
+
+    ' Weekdays, Monday = index 0
+    days = Array("Monday", "Tuesday", "Wednesday", "Thursday", "Friday")
+
+    ' Determine index for today (0 = Monday, ..., 4 = Friday)
+    Select Case Format(Date, "dddd")
+        Case "Monday": todayIndex = 0
+        Case "Tuesday": todayIndex = 1
+        Case "Wednesday": todayIndex = 2
+        Case "Thursday": todayIndex = 3
+        Case "Friday": todayIndex = 4
+        Case Else
+            MsgBox "Today is not a weekday (Mon–Fri). No action taken.", vbInformation
+            Exit Sub
+    End Select
+
+    ' Loop through each day from Monday to today
+    For dayIndex = 0 To todayIndex
+        checkCount = 0
+        colIndex = 3 + (dayIndex * 2) ' Right-hand column index: 3, 5, 7, 9, 11
+
+        For i = 2 To tbl.Rows.Count
+            If checkCount >= 17 Then Exit For
+
+            Set cellRange = tbl.Cell(i, colIndex).Range
+            cellRange.text = ChrW(10003)  ' ? Unicode checkmark
+            cellRange.Font.Name = "Segoe UI Symbol"
+            cellRange.Font.Size = 11
+            cellRange.ParagraphFormat.Alignment = wdAlignParagraphCenter
+
+            checkCount = checkCount + 1
+        Next i
+    Next dayIndex
+
+    MsgBox "Checklist filled for Monday through " & days(todayIndex) & ".", vbInformation
+End Sub
+
