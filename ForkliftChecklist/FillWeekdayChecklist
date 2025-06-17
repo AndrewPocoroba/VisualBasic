@@ -1,0 +1,48 @@
+
+Sub FillWeekdayChecklist()
+    Dim doc As Document
+    Dim tbl As Table
+    Dim dayIndex As Integer
+    Dim colIndex As Integer
+    Dim i As Integer
+    Dim cellRange As Range
+    Dim checkCount As Integer
+    Dim dayName As String
+    Dim days As Variant
+    
+    Set doc = ActiveDocument
+
+    If doc.Tables.Count = 0 Then
+        MsgBox "No tables found in the document.", vbExclamation
+        Exit Sub
+    End If
+
+    Set tbl = doc.Tables(1)
+
+    ' Monday through Friday only
+    days = Array("Monday", "Tuesday", "Wednesday", "Thursday", "Friday")
+
+    For dayIndex = 0 To 4
+        checkCount = 0
+        dayName = days(dayIndex)
+        
+        ' Map day to the right-hand column index (odd-numbered columns: 3, 5, 7, 9, 11)
+        colIndex = 3 + (dayIndex * 2)
+
+        ' Fill up to 17 rows for each day
+        For i = 2 To tbl.Rows.Count
+            If checkCount >= 17 Then Exit For
+
+            Set cellRange = tbl.Cell(i, colIndex).Range
+            cellRange.text = ChrW(10003)  ' ? Unicode checkmark
+            cellRange.Font.Name = "Segoe UI Symbol"
+            cellRange.Font.Size = 11
+            cellRange.ParagraphFormat.Alignment = wdAlignParagraphCenter
+
+            checkCount = checkCount + 1
+        Next i
+    Next dayIndex
+
+    MsgBox "Checklist filled for Monday through Friday.", vbInformation
+End Sub
+
