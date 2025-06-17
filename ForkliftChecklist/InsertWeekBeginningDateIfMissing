@@ -1,0 +1,41 @@
+Sub InsertWeekBeginningDateIfMissing()
+    Dim rng As Range
+    Dim today As Date
+    Dim monday As Date
+    Dim insertText As String
+    Dim existingText As String
+
+    Set rng = ActiveDocument.Content
+
+    ' Search for the phrase
+    With rng.Find
+        .text = "Week Beginning:"
+        .MatchCase = False
+        .MatchWholeWord = False
+        .MatchWildcards = False
+
+        If .Execute Then
+            ' Check if a date already follows
+            rng.Collapse Direction:=wdCollapseEnd
+            rng.MoveEndUntil Cset:=vbCr, Count:=wdForward
+            existingText = Trim(rng.text)
+
+            If Len(existingText) > 0 Then
+                MsgBox "A date already appears to be filled out: """ & existingText & """", vbInformation
+                Exit Sub
+            End If
+
+            ' Calculate this week's Monday
+            today = Date
+            monday = today - Weekday(today, vbMonday) + 1
+            insertText = " " & Format(monday, "dd/mm/yy")
+
+            ' Insert the date
+            rng.InsertAfter insertText
+            MsgBox "Week beginning date inserted: " & insertText, vbInformation
+        Else
+            MsgBox """Week Beginning:"" not found in the document.", vbExclamation
+        End If
+    End With
+End Sub
+
