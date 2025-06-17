@@ -1,0 +1,54 @@
+Sub InsertNA(dayOfWeek As String)
+    Dim doc As Document
+    Dim tbl As Table
+    Dim dayIndex As Integer
+    Dim colIndex As Integer
+    Dim i As Integer
+    Dim cellRange As Range
+    Dim checkCount As Integer
+    Dim days As Variant
+
+    Set doc = ActiveDocument
+
+    If doc.Tables.Count = 0 Then
+        MsgBox "No tables found in the document.", vbExclamation
+        Exit Sub
+    End If
+
+    Set tbl = doc.Tables(1)
+
+    ' Define weekdays and their indexes
+    days = Array("Monday", "Tuesday", "Wednesday", "Thursday", "Friday")
+
+    ' Find day index
+    dayIndex = -1
+    For i = LBound(days) To UBound(days)
+        If StrComp(days(i), dayOfWeek, vbTextCompare) = 0 Then
+            dayIndex = i
+            Exit For
+        End If
+    Next i
+
+    If dayIndex = -1 Then
+        MsgBox "Invalid day name passed: " & dayOfWeek, vbCritical
+        Exit Sub
+    End If
+
+    ' Get column index: Monday = 3, Tuesday = 5, etc.
+    colIndex = 3 + (dayIndex * 2)
+
+    checkCount = 0
+
+    For i = 2 To tbl.Rows.Count
+        If checkCount >= 17 Then Exit For
+
+        Set cellRange = tbl.Cell(i, colIndex).Range
+        cellRange.text = "N/A"
+        cellRange.Font.Name = "Calibri"
+        cellRange.Font.Size = 11
+        cellRange.ParagraphFormat.Alignment = wdAlignParagraphCenter
+
+        checkCount = checkCount + 1
+    Next i
+End Sub
+
