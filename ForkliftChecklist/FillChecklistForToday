@@ -1,0 +1,50 @@
+Sub FillChecklistForToday()
+    Dim doc As Document
+    Dim tbl As Table
+    Dim dayName As String
+    Dim colIndex As Integer
+    Dim i As Integer
+    Dim cellRange As Range
+    Dim checkCount As Integer
+
+    Set doc = ActiveDocument
+
+    If doc.Tables.Count = 0 Then
+        MsgBox "No tables found in the document.", vbExclamation
+        Exit Sub
+    End If
+
+    Set tbl = doc.Tables(1)
+
+    dayName = Format(Date, "dddd")
+
+    ' Map day to right-hand column index (each day spans two columns)
+    Select Case dayName
+        Case "Monday": colIndex = 3
+        Case "Tuesday": colIndex = 5
+        Case "Wednesday": colIndex = 7
+        Case "Thursday": colIndex = 9
+        Case "Friday": colIndex = 11
+        Case "Saturday": colIndex = 13
+        Case "Sunday": colIndex = 15
+        Case Else
+            MsgBox "Invalid day detected: " & dayName, vbCritical
+            Exit Sub
+    End Select
+
+    checkCount = 0
+
+    ' Loop through rows (starting at 2 to skip header)
+    For i = 2 To tbl.Rows.Count
+        If checkCount >= 17 Then Exit For
+
+        Set cellRange = tbl.Cell(i, colIndex).Range
+        cellRange.text = ChrW(10003)  ' ? checkmark
+        cellRange.Font.Name = "Segoe UI Symbol"
+        cellRange.Font.Size = 11
+        cellRange.ParagraphFormat.Alignment = wdAlignParagraphCenter
+
+        checkCount = checkCount + 1
+    Next i
+End Sub
+
